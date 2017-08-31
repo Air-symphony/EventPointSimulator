@@ -85,8 +85,7 @@ public class EventPointSimulation extends Application {
 		vb = new VBox(5);
 		String[] day = changeDataStage.getDaydataToString();
 		int d = Integer.parseInt(day[2]) + Integer.parseInt(day[3]);
-		printDay = new Label(day[0] + "/" + day[1] + "/" + day[2] + " ~ "
-				+ day[0] + "/" + day[1] + "/" + d);
+		printDay = new Label();
 		printDay.setAlignment(Pos.CENTER);
 
 		timeList = new ListView<String>();
@@ -485,16 +484,12 @@ public class EventPointSimulation extends Application {
 				Button tmp = (Button) e.getSource();
 				if (tmp.equals(bt[0])) {// Remaking
 					fileController.UpdateFile();
-					int d = Integer.parseInt(day[2]) + Integer.parseInt(day[3]) - 1;
-					printDay.setText(gametype.getValue() + ":" + day[0] + "/" + day[1] + "/" + day[2] + " ~ "
-							+ day[0] + "/" + day[1] + "/" + d);
+					textPrinter.DayPrint(gametype.getValue(), day);
 					calculator.Start(gametype.getValue(), daydata, statusField);
 					textPrinter.UpdateConfig_Success();
 				} else if (tmp.equals(bt[1])) {// new file
 					if(fileController.MakeFile()){
-						int d = Integer.parseInt(day[2]) + Integer.parseInt(day[3]);
-						printDay.setText(day[0] + "/" + day[1] + "/" + day[2] + " ~ "
-								+ day[0] + "/" + day[1] + "/" + d);
+						textPrinter.DayPrint(gametype.getValue(), day);
 						calculator.Start(gametype.getValue(), daydata, statusField);
 						textPrinter.SaveConfig_Success();
 					}

@@ -16,7 +16,6 @@ import javafx.stage.FileChooser;
 public class FileController {
 	private TextPrinter textPrinter;
 	private String[] alignText = { "日目 ", "時帯 ", "s" };
-	private Label printDay;
 	private ListView<String> alignList;
 	private ComboBox<String> gametype;
 	private ComboBox<String>[] daydata;// = new ComboBox[4];
@@ -29,7 +28,6 @@ public class FileController {
 	public FileController(Label printDay, ListView<String> alignList,
 			Label printAction, ComboBox<String> gametype, ComboBox<String>[] daydata,
 			TextField[] statusField) {
-		this.printDay = printDay;
 		this.alignList = alignList;
 		this.gametype = gametype;
 		this.daydata = daydata;
@@ -88,9 +86,7 @@ public class FileController {
 				alignList.setItems(items);
 				String[] day = { daydata[0].getValue(), daydata[1].getValue(),
 						daydata[2].getValue(), daydata[3].getValue() };
-				int d = Integer.parseInt(day[2]) + Integer.parseInt(day[3]) - 1;
-				printDay.setText(gametype.getValue() + ":" + day[0] + "/" + day[1] + "/" + day[2] + " ~ "
-						+ day[0] + "/" + day[1] + "/" + d);
+				textPrinter.DayPrint(gametype.getValue(), day);
 				textPrinter.ReadFile_Success();
 				//printAction.setText("ファイルを読み込みました．");
 			} catch (FileNotFoundException ex) {
@@ -205,12 +201,13 @@ public class FileController {
 			scanner = new Scanner(file);
 			String[] data = scanner.nextLine().split(",", 0);
 			gametype.setValue(data[0]);
+			String[] day = new String[4];
 			for (int i = 1; i < data.length; i++) {
+				day[i - 1] = data[i];
 				daydata[i - 1].setValue(data[i]);
 			}
-			int d = Integer.parseInt(data[3]) + Integer.parseInt(data[4]) - 1;
-			printDay.setText(data[0] + ":" + data[1] + "/" + data[2] + "/" + data[3] + " ~ "
-					+ data[1] + "/" + data[2] + "/" + d);
+			textPrinter.DayPrint(data[0], day);
+			
 			data = scanner.nextLine().split(",", 0);
 			for (int i = 0; i < data.length; i++) {
 				statusField[i].setText(data[i]);

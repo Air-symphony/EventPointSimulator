@@ -19,8 +19,10 @@ public class TextPrinter {
 		this.printAction = printAction;
 	}
 	
-	public void SetText(){
-		
+	public void DayPrint(String gametype, String[] day){
+		int d = Integer.parseInt(day[2]) + Integer.parseInt(day[3]) - 1;
+		printDay.setText(gametype + ":" + day[0] + "/" + day[1] + "/" + day[2] + " ~ "
+				+ day[0] + "/" + day[1] + "/" + d);
 	}
 	/**
 	 * @return printAction.setText("計算を行いました。");
