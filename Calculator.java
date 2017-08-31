@@ -105,11 +105,6 @@ public class Calculator {
 		while(pt[0] > n * p.point + pt[1] * p.ev_point){
 			n++;
 		}
-		/*int[] count = new int[3];
-		count[0] = n - 1;
-		count[1] = n * p.stamina;
-		count[2] = n * p.point + pt[1] * p.ev_point;
-		return count;*/
 		return n + " * " + p.point + " + " + pt[1] +" * " + p.ev_point + " = " + (n * p.point + pt[1] * p.ev_point);
 	}
 	

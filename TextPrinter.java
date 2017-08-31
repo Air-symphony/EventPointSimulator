@@ -23,6 +23,66 @@ public class TextPrinter {
 		
 	}
 	/**
+	 * @return printAction.setText("計算を行いました。");
+	 */
+	public void Calculate_Success(){
+		printAction.setText("計算を行いました。");
+	}
+	/**
+	 * @return printAction.setText("修正しました。");
+	 */
+	public void Align_Success(){
+		printAction.setText("修正しました。");
+	}
+	/**
+	 * @return printAction.setText("入力に不備があります。");
+	 */
+	public void Input_Error(){
+		printAction.setText("入力に不備があります。");
+	}
+	/**
+	 * @return printAction.setText("選択してください。");
+	 */
+	public void Select_Error(){
+		printAction.setText("選択してください。");
+	}
+	/**
+	 * @return printAction.setText("設定を保存しました．");
+	 */
+	public void SaveConfig_Success(){
+		printAction.setText("設定を保存しました．");
+	}
+	/**
+	 * @return printAction.setText("設定を保存しませんでした．");
+	 */
+	public void SaveConfig_Cancel(){
+		printAction.setText("設定を保存しませんでした．");
+	}
+	/**
+	 * @return printAction.setText("設定を保存できませんでした．");
+	 */
+	public void SaveConfig_Error(){
+		printAction.setText("設定を保存できませんでした．");
+	}
+	/**
+	 * @return printAction.setText("設定を更新しました．");
+	 */
+	public void UpdateConfig_Success(){
+		printAction.setText("設定を更新しました．");
+	}
+	/**
+	 * @return printAction.setText("設定を更新しませんでした．");
+	 */
+	public void UpdateConfig_Cancel(){
+		printAction.setText("設定を更新しませんでした．");
+	}
+	/**
+	 * @return printAction.setText("設定を更新できませんでした．");
+	 */
+	public void UpdateConfig_Error(){
+		printAction.setText("設定を更新できませんでした．");
+	}
+	/**
 	 * @return printAction.setText("ファイルに保存しました．");
 	 */
 	public void SaveFile_Success(){

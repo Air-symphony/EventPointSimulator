@@ -285,12 +285,12 @@ public class EventPointSimulation extends Application {
 						items.add(day[0] + alignText[0] + day[1] + alignText[1] + day[2] + alignText[2]);
 					
 					fileController.UpdateFile();
-					printAction.setText("修正しました。\n");
+					textPrinter.Align_Success();
 					for (int i = 0; i < alignField.length; i++) {
 						alignField[i].setText("");
 					}
 				} else {
-					printAction.setText("入力に不備があります。\n");
+					textPrinter.Input_Error();
 				}
 			}
 			else if (tmp.equals(alignButton[1])) {//clear
@@ -300,15 +300,15 @@ public class EventPointSimulation extends Application {
 			}
 			else if (tmp.equals(alignButton[2])) {// Delete
 				int id = alignList.getSelectionModel().getSelectedIndex();
-				printAction.setText("align_id : " + id);
+				textPrinter.Set_printAction("align_id : " + id);
 				if (id < 0){
-					printAction.setText("選択して下さい。\n");
+					textPrinter.Select_Error();
 				}
 				else{
 					ObservableList<String> items = alignList.getItems();
 					items.remove(id);
 					fileController.UpdateFile();
-					printAction.setText("修正しました。\n");
+					textPrinter.Align_Success();
 				}
 			}
 			calculator.SetAlign(fileController.getAlign());
@@ -321,12 +321,11 @@ public class EventPointSimulation extends Application {
 			if (tmp.equals(mainButton[0])) { // Calculator
 				calculator.SetAlign(fileController.getAlign());
 				calculator.Start(gametype.getValue(), daydata, statusField);
-				printAction.setText("計算を行いました\n");
+				textPrinter.Calculate_Success();
 			} else if (tmp.equals(mainButton[1])) {// Finish
 				fileController.UpdateConfig();
 				changeDataStage.Close();
 				stage.close();
-				// printAction.setText("設定を保存しました。\n");
 			}
 		}
 	}
@@ -349,9 +348,9 @@ public class EventPointSimulation extends Application {
 							Integer.parseInt(addcalField[1].getText())};
 					String count = calculator.addcalSimulater(gametype.getValue(), pt);
 					printAddcal.setText(count);
-					printAction.setText("計算を行いました\n");
+					textPrinter.Calculate_Success();
 				}else {
-					printAction.setText("入力に不備があります。\n");
+					textPrinter.Input_Error();
 				}
 			}
 		}
@@ -490,20 +489,20 @@ public class EventPointSimulation extends Application {
 					printDay.setText(gametype.getValue() + ":" + day[0] + "/" + day[1] + "/" + day[2] + " ~ "
 							+ day[0] + "/" + day[1] + "/" + d);
 					calculator.Start(gametype.getValue(), daydata, statusField);
-					printAction.setText("既存の設定を更新しました。\n");
+					textPrinter.UpdateConfig_Success();
 				} else if (tmp.equals(bt[1])) {// new file
 					if(fileController.MakeFile()){
 						int d = Integer.parseInt(day[2]) + Integer.parseInt(day[3]);
 						printDay.setText(day[0] + "/" + day[1] + "/" + day[2] + " ~ "
 								+ day[0] + "/" + day[1] + "/" + d);
 						calculator.Start(gametype.getValue(), daydata, statusField);
-						printAction.setText("新規の設定を保存しました。\n");
+						textPrinter.SaveConfig_Success();
 					}
 					else{
-						printAction.setText("設定を変更しませんでした。\n");
+						textPrinter.SaveConfig_Cancel();
 					}
 				} else if (tmp.equals(bt[2])) {// Cancel
-					printAction.setText("設定を変更しませんでした。\n");
+					textPrinter.SaveConfig_Cancel();
 				}
 				dayStage.close();
 			}

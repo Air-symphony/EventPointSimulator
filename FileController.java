@@ -18,7 +18,6 @@ public class FileController {
 	private String[] alignText = { "日目 ", "時帯 ", "s" };
 	private Label printDay;
 	private ListView<String> alignList;
-	//private Label printAction;
 	private ComboBox<String> gametype;
 	private ComboBox<String>[] daydata;// = new ComboBox[4];
 	private TextField[] statusField = new TextField[3];
@@ -32,7 +31,6 @@ public class FileController {
 			TextField[] statusField) {
 		this.printDay = printDay;
 		this.alignList = alignList;
-		//this.printAction = printAction;
 		this.gametype = gametype;
 		this.daydata = daydata;
 		this.statusField = statusField;
@@ -56,7 +54,6 @@ public class FileController {
 		File result = chooser.showOpenDialog(null);
 		if (result == null){
 			textPrinter.ReadFile_Cancel();
-			//printAction.setText("ファイルを読み込めませんでした．");
 			return false;
 		}
 		filename = result.getPath().toString();
@@ -142,10 +139,8 @@ public class FileController {
 					writer.println(item);
 				}
 				textPrinter.SaveFile_Success();
-				//printAction.setText("ファイルに保存しました．");
 			} catch (FileNotFoundException ex) {
 				textPrinter.SaveFile_Error();
-				//printAction.setText("ファイルに保存できません．");
 			} finally {
 				if (writer != null) {
 					writer.close();
@@ -154,7 +149,6 @@ public class FileController {
 		}
 		else{
 			textPrinter.SaveFile_Error();
-			//printAction.setText("ファイルに保存できません．");
 		}
 	}
 
@@ -175,7 +169,9 @@ public class FileController {
 
 		if (result != null) {
 			textPrinter.SaveFile_Success();
-			//printAction.setText(result.getPath().toString());
+			
+			textPrinter.Set_printAction(result.getPath().toString());
+			
 			currentFilename = result.getPath().toString();
 			if (!currentFilename.endsWith(filetype)) {
 				currentFilename += filetype;
