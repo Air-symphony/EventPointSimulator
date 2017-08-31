@@ -36,18 +36,18 @@ public class EventPointSimulation extends Application {
 	private MenuBar mb;
 	private Menu[] mn = new Menu[2];
 	private MenuItem[] mi = new MenuItem[3];
-	public Label printDay;
+	public Label printDay = new Label();
 	private ListView<String> timeList;
 	private ListView<String> detailList;
 	private ListView<String> alignList;
-	private String[] alignText = { "日目 ", "時帯 ", "s" };
 	private TextField[] alignField = new TextField[3];
 	private Button alignButton[] = new Button[3];
 	private Button mainButton[] = new Button[2];
 	private ComboBox<String> gametype;
 	private ComboBox<String>[] daydata = new ComboBox[4];
 	private TextField[] statusField = new TextField[3];
-	public Label printAction;
+	public Label printAction = new Label();
+	private String[] alignText;
 	
 	private TextField addcalField[] = new TextField[2];
 	private Button addcalButton = new Button();
@@ -80,13 +80,15 @@ public class EventPointSimulation extends Application {
 		statusField = changeDataStage.getstatusField();
 		//CreateMenuStage();
 		
-		HBox main = new HBox();
+		textPrinter = new TextPrinter(printDay, printAction);
+		alignText = textPrinter.getAlignText();
+		
+		HBox main = new HBox(10);
+		//main.setAlignment(Pos.CENTER);
 		hb = new HBox(5);
 		vb = new VBox(5);
-		String[] day = changeDataStage.getDaydataToString();
-		int d = Integer.parseInt(day[2]) + Integer.parseInt(day[3]);
+		vb.setAlignment(Pos.CENTER);
 		printDay = new Label();
-		printDay.setAlignment(Pos.CENTER);
 
 		timeList = new ListView<String>();
 		ObservableList<String> oll = FXCollections.observableArrayList();
@@ -167,7 +169,6 @@ public class EventPointSimulation extends Application {
 			hb.getChildren().add(mainButton[i]);
 			mainButton[i].setOnAction(new mainHandler());
 		}
-		printAction = new Label("Action");
 		vb.getChildren().addAll(hb, printAction);
 		main.getChildren().add(vb);
 
@@ -178,11 +179,10 @@ public class EventPointSimulation extends Application {
 		stage.setScene(sc);
 		stage.setTitle("アタポン型イベントポイント計算機");
 		stage.show();
+		
 		calculator = new Calculator(timeList);
 		fileController = new FileController(printDay, alignList, 
 				printAction, gametype, daydata, statusField);
-		textPrinter = new TextPrinter(printDay, printAction);
-		//setConfig(configfile);
 	}
 
 	class TimeListListener implements ChangeListener<String> {
@@ -222,74 +222,71 @@ public class EventPointSimulation extends Application {
 					String str = alignField[i].getText();
 					if (str.equals("")) {
 						update = false;
-					} else {
-						int[] limit = { 0, 0 };
-						if (i == 0) {
-							limit[1] = Integer.parseInt(daydata[3].getValue());
-						} else if (i == 1) {
-							if(alignField[0].getText().equals("1")){
-								limit[0] = 15;
-								limit[1] = 24;
-							}
-							else if(alignField[0].getText().equals(daydata[3].getValue())){
-								limit[1] = 21;
-							}
-							else {
-								limit[1] = 24;
-							}
-						} else if (i == 2) {
-							limit[0] = -255;
-							limit[1] = 255;
+						continue;
+					} 
+					int[] limit = { 0, 24 };
+					if (i == 0) {
+						limit[1] = Integer.parseInt(daydata[3].getValue());
+					} else if (i == 1) {
+						if(alignField[0].getText().equals("1")){
+							limit[0] = 15;
 						}
-						if (!pass.matcher(str).matches()) {
-							alignField[i].setText("");
-							update = false;
-						} else if (limit[0] > Integer.parseInt(str)
-								|| Integer.parseInt(str) > limit[1] 
-								|| 0 == Integer.parseInt(str) ) {
-							alignField[i].setText("");
-							update = false;
+						else if(alignField[0].getText().equals(daydata[3].getValue())){
+							limit[1] = 21;
 						}
+					} else if (i == 2) {
+						limit[0] = -255;
+						limit[1] = 255;
+					}
+					if (!pass.matcher(str).matches()) {
+						alignField[i].setText("");
+						update = false;
+					} else if (limit[0] > Integer.parseInt(str)
+							|| Integer.parseInt(str) > limit[1] 
+							|| 0 == Integer.parseInt(str) ) {
+						alignField[i].setText("");
+						update = false;
 					}
 				}
-				if (update) {
-					String[] day = { alignField[0].getText(),
-							alignField[1].getText(), alignField[2].getText() };
-					int insert = (Integer.parseInt(day[0]) - 1) * 24 + Integer.parseInt(day[1]);
-					
-					ObservableList<String> items = alignList.getItems();
-					int id = items.size();
-					int[] sort = new int[id];
-					for (int i = 0; i < id; i++){
-						String item = items.get(i);
-						for (int j = 0; j < alignText.length; j++) {
-							if (j < alignText.length - 1) {
-								item = item.replace(alignText[j], ",");
-							} else {
-								item = item.replace(alignText[j], "");
-							}
-						}
-						String[] str = item.split(",", 0);
-						sort[i] = ( (Integer.parseInt(str[0]) - 1) * 24 + Integer.parseInt(str[1]));
-					}
-					
-					boolean finish_add = false;
-					for(int i = 0; i < sort.length;i++){
-						if (insert < sort[i]){
-							items.add(i, day[0] + alignText[0] + day[1] + alignText[1] + day[2] + alignText[2]);
-							finish_add = true;
-						}
-					}
-					if (!finish_add)
-						items.add(day[0] + alignText[0] + day[1] + alignText[1] + day[2] + alignText[2]);
-					
-					fileController.UpdateFile();
-					textPrinter.Align_Success();
-					for (int i = 0; i < alignField.length; i++) {
-						alignField[i].setText("");
-					}
-				} else {
+				if (!update){
 					textPrinter.Input_Error();
+					return;
+				}
+				//既存の修正内容の順番の数値化
+				String[] day = { alignField[0].getText(),
+						alignField[1].getText(), alignField[2].getText() };
+				ObservableList<String> items = alignList.getItems();
+				int id = items.size();
+				int[] sort = new int[id];
+				for (int i = 0; i < id; i++){
+					String item = items.get(i);
+					for (int j = 0; j < alignText.length; j++) {
+						if (j < alignText.length - 1) {
+							item = item.replace(alignText[j], ",");
+						} else {
+							item = item.replace(alignText[j], "");
+						}
+					}
+					String[] str = item.split(",", 0);
+					sort[i] = ( (Integer.parseInt(str[0]) - 1) * 24 + Integer.parseInt(str[1]));
+				}
+				//修正内容の追加
+				boolean finish_add = false;
+				int insert = (Integer.parseInt(day[0]) - 1) * 24 + Integer.parseInt(day[1]);
+				for(int i = 0; i < sort.length;i++){
+					if (insert < sort[i]){
+						items.add(i, day[0] + alignText[0] + day[1] + alignText[1] + day[2] + alignText[2]);
+						finish_add = true;
+					}
+				}
+				//最後に追加
+				if (!finish_add)
+					items.add(day[0] + alignText[0] + day[1] + alignText[1] + day[2] + alignText[2]);
+				
+				fileController.UpdateFile();
+				textPrinter.Align_Success();
+				for (int i = 0; i < alignField.length; i++) {
+					alignField[i].setText("");
 				}
 			}
 			else if (tmp.equals(alignButton[1])) {//clear
@@ -360,8 +357,6 @@ public class EventPointSimulation extends Application {
 		private Button bt[] = new Button[3];
 		
 		public ChangeDataStage() {
-			/*this.daydata =daydata;
-			this.statusField = statusField;*/
 			VBox vb;
 			HBox hb;
 			
@@ -373,10 +368,10 @@ public class EventPointSimulation extends Application {
 			hb = new HBox(10);
 			hb.setAlignment(Pos.CENTER);
 			ObservableList<String> type = FXCollections.observableArrayList();
-			type.addAll("cinderella", "million");
+			type.addAll(new GameType().getList());
 			gametype =  new ComboBox<String>();
 			gametype.setItems(type);
-			gametype .setValue(type.get(0));
+			gametype.setValue(type.get(0));
 			hb.getChildren().addAll(new Label("GameType:"), gametype);
 			vb.getChildren().add(hb);
 			hb = new HBox(10);
@@ -479,8 +474,11 @@ public class EventPointSimulation extends Application {
 		
 		class DecideHandler implements EventHandler<ActionEvent> {
 			public void handle(ActionEvent e) {
-				String[] day = { daydata[0].getValue(), daydata[1].getValue(),
-						daydata[2].getValue(), daydata[3].getValue() };
+				//年、月、日、間
+				int[] day = { Integer.parseInt(daydata[0].getValue()),
+						Integer.parseInt(daydata[1].getValue()),
+						Integer.parseInt(daydata[2].getValue()),
+						Integer.parseInt(daydata[3].getValue()) };
 				Button tmp = (Button) e.getSource();
 				if (tmp.equals(bt[0])) {// Remaking
 					fileController.UpdateFile();

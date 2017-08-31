@@ -1,5 +1,7 @@
 package simulation;
 
+import java.time.LocalDate;
+
 import javafx.scene.control.Label;
 
 /**
@@ -10,6 +12,8 @@ public class TextPrinter {
 	public Label printDay;
 	public Label printAction;
 	
+	private String[] alignText = { "日目 ", "時帯 ", "s" };
+	
 	/**
 	 * @return this.printDay = printDay;
 		this.printAction = printAction;
@@ -18,11 +22,28 @@ public class TextPrinter {
 		this.printDay = printDay;
 		this.printAction = printAction;
 	}
-	
-	public void DayPrint(String gametype, String[] day){
-		int d = Integer.parseInt(day[2]) + Integer.parseInt(day[3]) - 1;
-		printDay.setText(gametype + ":" + day[0] + "/" + day[1] + "/" + day[2] + " ~ "
-				+ day[0] + "/" + day[1] + "/" + d);
+	/**
+	 * @param gametype
+	 * @param day //年、月、日、間
+	 * @return
+	 */
+	public void DayPrint(String gametype, int[] day){
+		int finish_year = day[0];//終了年
+		int finish_month = day[1];//終了月
+		int finish_day = day[2] + day[3] - 1;//終了日
+		
+		LocalDate ld = LocalDate.of(day[0], day[1], 1);
+		int dayMax = ld.lengthOfMonth();
+		if (finish_day  > dayMax){
+			finish_day  -= dayMax;
+			finish_month += 1;
+			if (finish_month == 13){
+				finish_year += 1;
+				finish_month = 1;
+			}
+		}
+		printDay.setText("TYPE : " + gametype + "\n" + day[0] + "/" + day[1] + "/" + day[2] + " ~ "
+				+ finish_year + "/" + finish_month + "/" + finish_day);
 	}
 	/**
 	 * @return printAction.setText("計算を行いました。");
@@ -133,5 +154,11 @@ public class TextPrinter {
 	 */
 	public void Set_printDay(String text){
 		printDay.setText(text);
+	}
+	/**
+	 * @return alignText = { "日目 ", "時帯 ", "s" };
+	 */
+	public String[] getAlignText(){
+		return alignText;
 	}
 }

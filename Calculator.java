@@ -14,11 +14,18 @@ public class Calculator {
 	private ObservableList<Data> memory;
 	private ObservableList<int[]> align = FXCollections.observableArrayList();
 	private ListView<String> timeList;
+	private GameType type;
 	
 	public Calculator(ListView<String> timeList) {
 		this.timeList = timeList;
+		this.type = new GameType();
 	}
-	
+	/**
+	 * 計算実行
+	 * @param gametype
+	 * @param daydata
+	 * @param statusField
+	 */
 	public void Start(String gametype, ComboBox<String>[] daydata, TextField[] statusField){
 		this.gametype = gametype;
 		memory = FXCollections.observableArrayList();
@@ -34,54 +41,66 @@ public class Calculator {
 			day_now[i] = Integer.parseInt(day_now_text[i]);
 		
 		int timeList_id = 0, timeList_count = 0;
-
 		int align_id = 0;
+		
+		//計算内容,1日単位
 		for (int d = 1; d <= status.term; d++) {// 日単位
+			//最初の日と最終日の時間指定
 			int start = 0;
 			int end = 24;
 			if (d == 1)
 				start = 15;
 			else if (d == status.term)
 				end = 21;
+			
+			//日付のタブ
 			memory.add(new Data());
 			int[] ticket = status.TicketTime(d);
-			if(gametype.equals("cinderella")){
+			if(gametype.equals(type.cinderella)){
 				schedule.add(d + "日目<" + ticket[0] + "," + ticket[1] + ","
 						+ ticket[2] + ">");
 			}
-			else if(gametype.equals("million")){
+			else if(gametype.equals(type.million)){
 				schedule.add(d + "日目");
 			}
 			timeList_count++;
 			
 			status.item += status.p.dailyitem;//ログインボーナス
 			status.stamina += status.p.dailystamina;;//デイリースタドリ
-			for (int h = start + 1; h < end + 1; h++) {// 時間単位
+			//1時間単位で
+			for (int h = start + 1; h < end + 1; h++) {
 				status.stamina += 12;
+				//補正内容の適応
 				if (align_id < align.size()){
 					if (align.get(align_id)[0] == d && align.get(align_id)[1] == h){
 						status.stamina += align.get(align_id)[2];
 						align_id++;
 					}
 				}
+				//通常曲の処理
 				status.addpoint_Normal();
-				if(gametype.equals("cinderella")){
+				//イベント曲の処理
+				if(gametype.equals(type.cinderella)){
 					for (int i = 0; i < ticket.length; i++) {
 						if (h == ticket[i]) {
 							status.addpoint_Event();
 						}
 					}
 				}
-				else if(gametype.equals("million")){
+				else if(gametype.equals(type.million)){
 					status.addpoint_Event();
 				}
+				
+				//timeListの表示内容
 				memory.add(new Data((d * 24 + h), status));
 				if (h < 10)
 					schedule.add(d + "日目 0" + h + "時  " + status.getpoint() + "pt");
 				else
 					schedule.add(d + "日目 " + h + "時  " + status.getpoint() + "pt");
 				timeList_count++;
-				if (day_now[0] == (status.day + d - 1) && day_now[1] == h){
+				
+				//現在時刻にカーソルを合わせる
+				if (day_now[2] == (status.day + d - 1) && day_now[3] == h){
 					timeList_id = timeList_count;
 				}
 			}
@@ -89,15 +108,28 @@ public class Calculator {
 		timeList.setItems(schedule);
 		timeList.getSelectionModel().select(timeList_id);
 	}
-	
+	/**
+	 * 修正内容の登録
+	 * @param align
+	 */
 	public void SetAlign(ObservableList<int[]> align){
 		this.align = align;
 	}
 	
+	/**
+	 * 
+	 * @return memory
+	 */
 	public ObservableList<Data> Getmemory(){
 		return memory;
 	}
 	
+	/**
+	 * 修正内容の計算
+	 * @param String gametype
+	 * @param int[] pt 
+	 * @return
+	 */
 	public String addcalSimulater(String gametype, int[] pt){
 		this.gametype = gametype;
 		EventPoint p = new EventPoint();
@@ -114,7 +146,7 @@ public class Calculator {
 		private int item, point, ev_point;
 
 		EventPoint() {
-			if(gametype.equals("cinderella")){
+			if(gametype.equals(type.cinderella)){
 				stamina = 18;
 				exp = 63;
 				ev_exp = 70;
@@ -123,7 +155,7 @@ public class Calculator {
 				ev_point = 320;
 				dailyitem = 300;
 				dailystamina = 20;
-			}else if(gametype.equals("million")){
+			}else if(gametype.equals(type.million)){
 				stamina = 30;
 				exp = ev_exp= 306;
 				item = 180;
@@ -167,13 +199,13 @@ public class Calculator {
 			int count = item / p.item;
 			for (int i = 0; i < count; i++) {
 				point += p.ev_point;
-				if(gametype.equals("cinderella")){
+				if(gametype.equals(type.cinderella)){
 					if (eventcount == 0 || 30 < eventcount)
 						exp += p.exp;
 					else
 						exp += p.ev_exp;
 				}
-				else if(gametype.equals("million")){
+				else if(gametype.equals(type.million)){
 					exp += p.exp;
 				}
 				eventcount += 1;
@@ -184,7 +216,7 @@ public class Calculator {
 
 		int expMax() {
 			int count = 0;
-			if(gametype.equals("cinderella")){
+			if(gametype.equals(type.cinderella)){
 				count = 10;
 				for (int x = 1; x < level + 1; x++) {
 					count += 20;
@@ -201,7 +233,7 @@ public class Calculator {
 					}
 				}
 			}
-			else if(gametype.equals("million")){
+			else if(gametype.equals(type.million)){
 				count = 50;
 				count += (level - 1) * 100;
 			}
@@ -210,7 +242,7 @@ public class Calculator {
 
 		int staminaMax() {
 			float count = 0;
-			if(gametype.equals("cinderella")){
+			if(gametype.equals(type.cinderella)){
 				count = 40;
 				for (int i = 1; i < level + 1; i++) {
 					if (i <= 20) {
@@ -226,7 +258,7 @@ public class Calculator {
 					}
 				}
 			}
-			else if(gametype.equals("million")){
+			else if(gametype.equals(type.million)){
 				count = 60;
 				for (int i = 1; i < level + 1; i++) {
 					if (i <= 60) {
@@ -243,10 +275,10 @@ public class Calculator {
 			if (exp >= expMax()) {
 				exp -= expMax();
 				level += 1;
-				if(gametype.equals("cinderella")){
+				if(gametype.equals(type.cinderella)){
 					stamina += staminaMax();
 				}
-				else if(gametype.equals("million")){
+				else if(gametype.equals(type.million)){
 					stamina = staminaMax();
 				}
 			}

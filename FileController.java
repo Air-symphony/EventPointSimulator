@@ -15,7 +15,7 @@ import javafx.stage.FileChooser;
 
 public class FileController {
 	private TextPrinter textPrinter;
-	private String[] alignText = { "日目 ", "時帯 ", "s" };
+	private String[] alignText;
 	private ListView<String> alignList;
 	private ComboBox<String> gametype;
 	private ComboBox<String>[] daydata;// = new ComboBox[4];
@@ -33,9 +33,11 @@ public class FileController {
 		this.daydata = daydata;
 		this.statusField = statusField;
 		this.textPrinter = new TextPrinter(printDay, printAction);
+		this.alignText = this.textPrinter.getAlignText();
 		SetConfig();
 	}
-
+/*ファイルを開く
+ */
 	boolean OpenFile() {
 		String filename = null;
 		FileChooser chooser = new FileChooser();
@@ -50,101 +52,112 @@ public class FileController {
 			// chooser.setSelectedFile(new File(currentFilename));
 		}
 		File result = chooser.showOpenDialog(null);
+		//選ばずに閉じた場合
 		if (result == null){
 			textPrinter.ReadFile_Cancel();
 			return false;
 		}
+		//ファイルを選んだ場合
 		filename = result.getPath().toString();
 		if (!filename.endsWith(filetype)) {
 			filename += filetype;
 		}
-		currentFilename = filename;
-		if (filename != null) {
+		currentFilename = filename;//選択されたファイルの保存
+		Scanner scanner = null;
+		try {
 			File file = new File(filename);
-			Scanner scanner = null;
-			try {
-				scanner = new Scanner(file);
-				String[] data = scanner.nextLine().split(",", 0);//cinderella,2016,8,1,8
-				gametype.setValue(data[0]);
-				for (int i = 1; i < data.length; i++) {
-					daydata[i - 1].setValue(data[i]);
+			scanner = new Scanner(file);
+			//gametype,年,月,日
+			String[] data = scanner.nextLine().split(",", 0);
+			gametype.setValue(data[0]);
+			for (int i = 1; i < data.length; i++) {
+				daydata[i - 1].setValue(data[i]);
+			}
+			//stamina,level,exp
+			data = scanner.nextLine().split(",", 0);
+			for (int i = 0; i < data.length; i++) {
+				statusField[i].setText(data[i]);
+			}
+			//修正内容の読み込み、表示
+			ObservableList<String> items = FXCollections.observableArrayList();
+			while (scanner.hasNextLine()) {
+				String[] day = scanner.nextLine().split(",", 0);
+				String text = "";
+				for (int i = 0; i < day.length; i++) {
+					text += day[i] + alignText[i];
 				}
-				data = scanner.nextLine().split(",", 0);//stamina,level,exp
-				for (int i = 0; i < data.length; i++) {
-					statusField[i].setText(data[i]);
-				}
-				ObservableList<String> items = FXCollections
-						.observableArrayList();
-				while (scanner.hasNextLine()) {
-					String[] day = scanner.nextLine().split(",", 0);
-					String text = "";
-					for (int i = 0; i < day.length; i++) {
-						text += day[i] + alignText[i];
-					}
-					items.add(text);
-				}
-				alignList.setItems(items);
-				String[] day = { daydata[0].getValue(), daydata[1].getValue(),
-						daydata[2].getValue(), daydata[3].getValue() };
-				textPrinter.DayPrint(gametype.getValue(), day);
-				textPrinter.ReadFile_Success();
-				//printAction.setText("ファイルを読み込みました．");
-			} catch (FileNotFoundException ex) {
-				textPrinter.ReadFile_Error();
-				//printAction.setText("ファイルを読み込めませんでした．");
-			} finally {
-				if (scanner != null) {
-					scanner.close();
-				}
+				items.add(text);
+			}
+			alignList.setItems(items);
+			//テキストの表示 年、月、日、間
+			int[] day = { Integer.parseInt(daydata[0].getValue()),
+					Integer.parseInt(daydata[1].getValue()),
+					Integer.parseInt(daydata[2].getValue()),
+					Integer.parseInt(daydata[3].getValue()) };
+			textPrinter.DayPrint(gametype.getValue(), day);
+			textPrinter.ReadFile_Success();
+		} catch (FileNotFoundException ex) {
+			textPrinter.ReadFile_Error();
+			return false;
+		} finally {
+			if (scanner != null) {
+				scanner.close();
 			}
 		}
 		return true;
 	}
-
+/**
+ * ファイルの上書き
+ */
 	void UpdateFile() {
-		if (currentFilename != null) {
-			File file = new File(currentFilename);
-			PrintWriter writer = null;
-			try {
-				writer = new PrintWriter(file);
-				writer.print(gametype.getValue() + ",");
-				for (int i = 0; i < daydata.length; i++) {
-					writer.print(daydata[i].getValue());
-					if (i < daydata.length - 1) {
-						writer.print(",");
-					}
-				}
-				writer.println();
-				for (int i = 0; i < statusField.length; i++) {
-					writer.print(statusField[i].getText());
-					if (i < statusField.length - 1) {
-						writer.print(",");
-					}
-				}
-				writer.println();
-				ObservableList<String> items = alignList.getItems();
-				for(int j = 0; j < items.size();j++){
-					String item = items.get(j);
-					for (int i = 0; i < alignText.length; i++) {
-						if (i < alignText.length - 1) {
-							item = item.replace(alignText[i], ",");
-						} else {
-							item = item.replace(alignText[i], "");
-						}
-					}
-					writer.println(item);
-				}
-				textPrinter.SaveFile_Success();
-			} catch (FileNotFoundException ex) {
-				textPrinter.SaveFile_Error();
-			} finally {
-				if (writer != null) {
-					writer.close();
+		if (currentFilename == null){
+			textPrinter.SaveFile_Error();
+			return;
+		}
+		
+		File file = new File(currentFilename);
+		PrintWriter writer = null;
+		try {
+			writer = new PrintWriter(file);
+			//ゲームタイプの記述
+			writer.print(gametype.getValue() + ",");
+			//開始日時の記述
+			for (int i = 0; i < daydata.length; i++) {
+				writer.print(daydata[i].getValue());
+				if (i < daydata.length - 1) {
+					writer.print(",");
 				}
 			}
-		}
-		else{
+			writer.println();
+			//ステータスの記述
+			for (int i = 0; i < statusField.length; i++) {
+				writer.print(statusField[i].getText());
+				if (i < statusField.length - 1) {
+					writer.print(",");
+				}
+			}
+			writer.println();
+			//修正内容の記述
+			ObservableList<String> items = alignList.getItems();
+			for(int j = 0; j < items.size();j++){
+				String item = items.get(j);
+				for (int i = 0; i < alignText.length; i++) {
+					if (i < alignText.length - 1) {
+						item = item.replace(alignText[i], ",");
+					} else {
+						item = item.replace(alignText[i], "");
+					}
+				}
+				writer.println(item);
+			}
+			textPrinter.SaveFile_Success();
+		} catch (FileNotFoundException ex) {
 			textPrinter.SaveFile_Error();
+			return;
+		} finally {
+			if (writer != null) {
+				writer.close();
+			}
 		}
 	}
 
@@ -163,18 +176,15 @@ public class FileController {
 		}
 		File result = chooser.showSaveDialog(null);
 
-		if (result != null) {
-			textPrinter.SaveFile_Success();
-			
-			textPrinter.Set_printAction(result.getPath().toString());
-			
-			currentFilename = result.getPath().toString();
-			if (!currentFilename.endsWith(filetype)) {
-				currentFilename += filetype;
-			}
-		}
-		else {
+		if (result == null)
 			return false;
+		
+		textPrinter.SaveFile_Success();
+		textPrinter.Set_printAction(result.getPath().toString());
+		
+		currentFilename = result.getPath().toString();
+		if (!currentFilename.endsWith(filetype)) {
+			currentFilename += filetype;
 		}
 		UpdateFile();
 		return true;
@@ -189,7 +199,8 @@ public class FileController {
 			textPrinter.ReadFile_Success();
 		} catch (FileNotFoundException ex) {
 			textPrinter.ReadFile_Error();
-			System.out.println(ex);
+			return;
+			//System.out.println(ex);
 		} finally {
 			if (scanner != null) {
 				scanner.close();
@@ -201,9 +212,9 @@ public class FileController {
 			scanner = new Scanner(file);
 			String[] data = scanner.nextLine().split(",", 0);
 			gametype.setValue(data[0]);
-			String[] day = new String[4];
+			int[] day = new int[data.length - 1];
 			for (int i = 1; i < data.length; i++) {
-				day[i - 1] = data[i];
+				day[i - 1] = Integer.parseInt(data[i]);
 				daydata[i - 1].setValue(data[i]);
 			}
 			textPrinter.DayPrint(data[0], day);
