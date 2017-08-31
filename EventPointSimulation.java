@@ -88,7 +88,6 @@ public class EventPointSimulation extends Application {
 		hb = new HBox(5);
 		vb = new VBox(5);
 		vb.setAlignment(Pos.CENTER);
-		printDay = new Label();
 
 		timeList = new ListView<String>();
 		ObservableList<String> oll = FXCollections.observableArrayList();
