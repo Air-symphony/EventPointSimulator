@@ -101,8 +101,7 @@ public class EventPointSimulation extends Application {
 		vb = new VBox(5);
 		oll = FXCollections.observableArrayList();
 		detailList = new ListView<String>();
-		oll = FXCollections.observableArrayList("Time:", "Point", "Item",
-				"stamina", "Normal", "Event");
+		oll = FXCollections.observableArrayList(new Data().getDetailText());
 		detailList.setItems(oll);
 
 		alignList = new ListView<String>();

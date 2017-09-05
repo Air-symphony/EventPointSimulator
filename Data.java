@@ -7,19 +7,21 @@ public class Data {
 	public int normalcount, eventcount;
 
 	Data() {
-		id = level = stamina = exp = 0;
-		point = item = normalcount = eventcount = 0;
+		this.id = -1;
+		this.level = this.stamina = this.exp = 0;
+		this.point = this.item = 
+				this.normalcount = this.eventcount = 0;
 	}
 
 	Data(int id, Data d) {
 		this.id = id;
-		level = d.level;
-		stamina = d.stamina;
-		exp = d.exp;
-		point = d.point;
-		item = d.item;
-		normalcount = d.normalcount;
-		eventcount = d.eventcount;
+		this.level = d.level;
+		this.stamina = d.stamina;
+		this.exp = d.exp;
+		this.point = d.point;
+		this.item = d.item;
+		this.normalcount = d.normalcount;
+		this.eventcount = d.eventcount;
 	}
 
 	public String getlevel() {
@@ -78,10 +80,20 @@ public class Data {
 		return "Event : " + eventcount;
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	public String[] getDetailText(){
-		String[] str = {getpointToString(), getlevelToString(), getstaminaToString(),
-				getexpToString(), getitemToString(), getnormalcountToString(),
-				geteventcountToString()};
-		return str;
+		if (this.id == -1){
+			String[] str = {"Print a detail of schedule."};
+			return str;
+		}
+		else{
+			String[] str = {getpointToString(), getlevelToString(), getstaminaToString(),
+					getexpToString(), getitemToString(), getnormalcountToString(),
+					geteventcountToString()};
+			return str;
+		}
 	}
 }

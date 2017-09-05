@@ -1,6 +1,7 @@
 package simulation;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Calendar;
 
 import javafx.collections.FXCollections;
@@ -32,22 +33,13 @@ public class Calculator {
 		ObservableList<String> schedule = FXCollections.observableArrayList();
 		Status status = new Status(daydata, statusField);
 		
-		Calendar c = Calendar.getInstance();
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/M/d/H");
-		String[] day_now_text = sdf.format(c.getTime()).split("/");
-		//現在の日付
-		int[] day_now = new int[day_now_text.length];
-		for(int i = 0; i < day_now_text.length ; i++)
-			day_now[i] = Integer.parseInt(day_now_text[i]);
-		
 		int timeList_id = 0, timeList_count = 0;
 		int align_id = 0;
 		
 		//計算内容,1日単位
 		for (int d = 1; d <= status.term; d++) {// 日単位
 			//最初の日と最終日の時間指定
-			int start = 0;
-			int end = 24;
+			int start = 0, end = 24;
 			if (d == 1)
 				start = 15;
 			else if (d == status.term)
@@ -55,8 +47,10 @@ public class Calculator {
 			
 			//日付のタブ
 			memory.add(new Data());
-			int[] ticket = status.TicketTime(d);
+			//トレチケタイム
+			int[] ticket = new int[3];
 			if(gametype.equals(type.cinderella)){
+				ticket = status.TicketTime(d);
 				schedule.add(d + "日目<" + ticket[0] + "," + ticket[1] + ","
 						+ ticket[2] + ">");
 			}
@@ -100,13 +94,14 @@ public class Calculator {
 				timeList_count++;
 				
 				//現在時刻にカーソルを合わせる
-				if (day_now[2] == (status.day + d - 1) && day_now[3] == h){
+				if (status.isJustTime(d, h)){
 					timeList_id = timeList_count;
 				}
 			}
 		}
-		timeList.setItems(schedule);
-		timeList.getSelectionModel().select(timeList_id);
+		timeList.setItems(schedule);//スケジュール生成
+		timeList.getSelectionModel().select(timeList_id);//フォーカスの設定
+		timeList.scrollTo(timeList_id);//フォーカスされた行の表示
 	}
 	/**
 	 * 修正内容の登録
@@ -170,6 +165,7 @@ public class Calculator {
 	class Status extends Data {
 		private EventPoint p = new EventPoint();
 		private int year, month, day, term;
+		private int[] nowTime;
 
 		Status(ComboBox<String>[] daydata, TextField[] statusField) {
 			year = Integer.parseInt(daydata[0].getValue());
@@ -181,6 +177,35 @@ public class Calculator {
 			stamina = Integer.parseInt(statusField[1].getText());
 			exp = Integer.parseInt(statusField[2].getText());
 			point = item = normalcount = eventcount = 0;
+			setnowTime();
+		}
+		
+		/**
+		 * 現在時刻と経過時間が同じかどうか
+		 * @param count_day 経過日数
+		 * @param count_hour 経過時間
+		 * @return　(nowTime[2] == (day + count_day - 1) 
+					&& nowTime[3] == count_hour)
+		 */
+		boolean isJustTime(int count_day, int count_hour){
+			LocalDate ld = LocalDate.of(year, month, 1);
+			int length_month = ld.lengthOfMonth();
+	
+			return (nowTime[2] == ((day + count_day - 1) % length_month)
+					&& nowTime[3] == count_hour);
+		}
+		/**
+		 * 現在時刻の取得
+		 * @return day_now[4] = {年,月,日,時}
+		 */
+		private void setnowTime(){
+			Calendar c = Calendar.getInstance();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/M/d/H");
+			String[] day_now_text = sdf.format(c.getTime()).split("/");
+			//現在の日付
+			nowTime = new int[day_now_text.length];
+			for(int i = 0; i < day_now_text.length ; i++)
+				nowTime[i] = Integer.parseInt(day_now_text[i]);
 		}
 
 		void addpoint_Normal() {
