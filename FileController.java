@@ -22,8 +22,10 @@ public class FileController {
 	private TextField[] statusField = new TextField[3];
 
 	private String currentFilename = ""; // 現在のファイル名
-	private String config = "D:\\Eclipse\\4.4.x\\Workspace\\j4\\simulator\\Config.txt";
-	private String filetype = ".txt";
+	private String InitialFolder = ".\\simulator";
+	private String saveFolder = InitialFolder + "\\SaveData";
+	private String configFile = InitialFolder + "\\Config.dll";
+	private String saveFileType = ".txt";
 
 	public FileController(Label printDay, ListView<String> alignList,
 			Label printAction, ComboBox<String> gametype, ComboBox<String>[] daydata,
@@ -42,14 +44,13 @@ public class FileController {
 		String filename = null;
 		FileChooser chooser = new FileChooser();
 		chooser.setTitle("Open Resource File");
-		chooser.setInitialDirectory(new File(System.getProperty("user.dir")));
+		chooser.setInitialDirectory(new File(saveFolder));
 		chooser.getExtensionFilters().add(
-				new FileChooser.ExtensionFilter("Saveファイル", "*" + filetype));
+				new FileChooser.ExtensionFilter("Saveファイル", "*" + saveFileType));
 		chooser.getExtensionFilters().add(
 				new FileChooser.ExtensionFilter("すべてのファイル", "*.*"));
 		if (currentFilename != null) {
 			chooser.setInitialFileName(currentFilename);
-			// chooser.setSelectedFile(new File(currentFilename));
 		}
 		File result = chooser.showOpenDialog(null);
 		//選ばずに閉じた場合
@@ -59,8 +60,8 @@ public class FileController {
 		}
 		//ファイルを選んだ場合
 		filename = result.getPath().toString();
-		if (!filename.endsWith(filetype)) {
-			filename += filetype;
+		if (!filename.endsWith(saveFileType)) {
+			filename += saveFileType;
 		}
 		currentFilename = filename;//選択されたファイルの保存
 		Scanner scanner = null;
@@ -164,16 +165,14 @@ public class FileController {
 	boolean MakeFile() {
 		FileChooser chooser = new FileChooser();
 		chooser.setTitle("Save Resource File");
-		chooser.setInitialDirectory(new File(System.getProperty("user.dir")));
+		chooser.setInitialDirectory(new File(saveFolder));
 		chooser.getExtensionFilters().add(
-				new FileChooser.ExtensionFilter("Saveファイル", "*" + filetype));
+				new FileChooser.ExtensionFilter("Saveファイル", "*" + saveFileType));
 		chooser.getExtensionFilters().add(
 				new FileChooser.ExtensionFilter("すべてのファイル", "*.*"));
+		
+		chooser.setInitialFileName(getFileName());
 
-		if (currentFilename != null) {
-			chooser.setInitialFileName(new File(currentFilename).getName());
-			// chooser.setSelectedFile(new File(currentFilename));
-		}
 		File result = chooser.showSaveDialog(null);
 
 		if (result == null)
@@ -183,15 +182,23 @@ public class FileController {
 		textPrinter.Set_printAction(result.getPath().toString());
 		
 		currentFilename = result.getPath().toString();
-		if (!currentFilename.endsWith(filetype)) {
-			currentFilename += filetype;
+		if (!currentFilename.endsWith(saveFileType)) {
+			currentFilename += saveFileType;
 		}
 		UpdateFile();
 		return true;
 	}
+	
+	String getFileName(){
+		return daydata[0].getValue() + 
+				String.format("%2s", daydata[1].getValue()).replace(" ", "0") + 
+				String.format("%2s", daydata[2].getValue()).replace(" ", "0") + 
+				"(" + daydata[3].getValue() + ")_" +
+				gametype.getValue();
+	}
 
 	void SetConfig() {
-		File file = new File(config);
+		File file = new File(configFile);
 		Scanner scanner = null;
 		try {
 			scanner = new Scanner(file);
@@ -244,7 +251,7 @@ public class FileController {
 	}
 
 	void UpdateConfig() {
-		File file = new File(config);
+		File file = new File(configFile);
 		PrintWriter writer = null;
 		try {
 			writer = new PrintWriter(file);

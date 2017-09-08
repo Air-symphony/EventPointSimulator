@@ -141,7 +141,7 @@ public class Main extends Application {
 		hb = new HBox(5);
 		hb.setAlignment(Pos.CENTER);
 		// String[] text2 = { "日目", "時帯", "" };
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < alignField.length; i++) {
 			HBox hbox = new HBox(0);
 			hbox.setAlignment(Pos.CENTER);
 			alignField[i] = new TextField();
@@ -350,7 +350,11 @@ public class Main extends Application {
 		}
 	}
 	
+	//ファイル生成、編集ステージ
 	public class ChangeDataStage{
+		//イベント期間
+		private int eventRange_min = 7;
+		private int eventRange_max = 14;
 		private Stage dayStage;
 		private Button bt[] = new Button[3];
 		
@@ -378,7 +382,6 @@ public class Main extends Application {
 			for (int i = 0; i < daydata.length; i++) {
 				int[] item = { 2015, 2025 };
 				daydata[i] = new ComboBox<String>();
-				// daydata[i].setStyle("-fx-font-size: " + fontsize + "px;");
 				if (i == 1) {
 					item[0] = 1;
 					item[1] = 12;
@@ -386,8 +389,8 @@ public class Main extends Application {
 					item[0] = 1;
 					item[1] = 31;
 				} else if (i == 3) {
-					item[0] = 7;
-					item[1] = 11;
+					item[0] = eventRange_min;
+					item[1] = eventRange_max;
 				}
 				ObservableList<String> ol = FXCollections.observableArrayList();
 				for (int j = item[0]; j <= item[1]; j++)
