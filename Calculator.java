@@ -100,6 +100,7 @@ public class Calculator {
 			}
 		}
 		timeList.setItems(schedule);//スケジュール生成
+		if (timeList_id == 0)timeList_id = timeList_count - 1;//最後尾を選択
 		timeList.getSelectionModel().select(timeList_id);//フォーカスの設定
 		timeList.scrollTo(timeList_id);//フォーカスされた行の表示
 	}
